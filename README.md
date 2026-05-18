@@ -42,9 +42,6 @@ constexpr auto s = utf8_sjis::utf8_to_sjis<"こんにちは🤔世界", true>;
 | `utf8_to_sjis.hpp` | メインヘッダ。UTF-8 → SJIS 変換ロジック |
 | `unicode_to_sjis.hpp` | Unicode コードポイント → SJIS 変換テーブル（自動生成） |
 | `generate_unicode_to_sjis.py` | `unicode_to_sjis.hpp` を生成する Python スクリプト |
-| `test.cpp` | 動作確認用テストコード |
-| `CMakeLists.txt` | CMake プロジェクト設定 |
-| `cmake/utf8_sjisConfig.cmake.in` | CMake パッケージ設定テンプレート |
 
 ## 開発
 

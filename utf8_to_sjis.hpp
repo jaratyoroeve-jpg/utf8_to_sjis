@@ -3,6 +3,7 @@
 #if __cplusplus > 201703L // c++20
 #include <array>
 #include "unicode_to_sjis.hpp"
+#include "unicode_limited_normalization.hpp"
 
 namespace utf8_sjis {
 
@@ -46,8 +47,7 @@ struct sjis_conversion_buffer {
 template <string_literal src, bool replace_unmappable>
 consteval auto convert_utf8_to_sjis()
 {
-    sjis_conversion_buffer<src.size * 4> result{}; // 最悪ケース: 全て4バイトのUTF-8で、全てがSJISに変換できない場合
-    result.size = 0;
+    sjis_conversion_buffer<src.size * 2> result{}; // UTF-8 の最大バイト数は 4 バイトだが、SJIS では最大 2 バイトなので、十分な容量を確保するために src.size * 2 としている
     
     // 不完全または不正な UTF-8 シーケンスを処理するラムダ関数
     auto handle_invalid = [&](size_t& pos) {
@@ -87,6 +87,19 @@ consteval auto convert_utf8_to_sjis()
             codepoint = ((c & 0x0F) << 12) |
                         ((src.array[pos + 1] & 0x3F) << 6) |
                         (src.array[pos + 2] & 0x3F);
+            // unicode正規化(濁点・半濁点のみ対応)
+            if (pos + 5 < src.size) {
+                // 次の文字が濁点・半濁点かどうかを確認するために、さらに3バイト読み込む
+                uint32_t next_codepoint = 0;
+                next_codepoint = ((src.array[pos + 3] & 0x0F) << 12) |
+                                 ((src.array[pos + 4] & 0x3F) << 6) |
+                                 (src.array[pos + 5] & 0x3F);
+                uint32_t normalized = unicode_limited_normalization(next_codepoint, codepoint);
+                if (normalized != 0x0000) {
+                    codepoint = normalized;
+                    pos += 3;
+                }
+            }
             pos += 3;
         } else if ((c & 0xF8) == 0xF0) {
             // 4 バイトの UTF-8 (BMP 外の文字)
@@ -103,14 +116,14 @@ consteval auto convert_utf8_to_sjis()
             handle_invalid(pos);
             continue;
         }
-        auto sjis = unicode_to_sjis(codepoint);
-        if (replace_unmappable && sjis.num == 0) {
+        auto mapped = unicode_to_sjis(codepoint);
+        if (replace_unmappable && mapped.num == 0) {
             // 変換できない文字は '?' に置換
             result.bytes[result.size++] = 0x3F; // '?'
             continue;
         }
-        for (unsigned char j = 0; j < sjis.num; ++j) {
-            result.bytes[result.size++] = sjis.byte[j];
+        for (unsigned char j = 0; j < mapped.num; ++j) {
+            result.bytes[result.size++] = mapped.byte[j];
         }
     }
     if (result.size == 0) {
@@ -133,7 +146,6 @@ consteval auto make_sjis_array()
 {
     constexpr auto temporary = convert_utf8_to_sjis<src, replace_unmappable>();
     std::array<unsigned char, temporary.size> result{};
-    size_t out = 0;
 
     for (size_t i = 0; i < temporary.size; i++) {
         result[i] = temporary.bytes[i];
