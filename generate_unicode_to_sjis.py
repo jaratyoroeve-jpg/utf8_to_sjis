@@ -24,6 +24,7 @@ def generate():
     lines.append("// DO NOT EDIT MANUALLY")
     lines.append("#pragma once")
     lines.append("#if __cplusplus > 201703L")
+    lines.append("#include <cstdint>")
     lines.append("")
     lines.append("namespace utf8_sjis {")
     lines.append("namespace detail {")
