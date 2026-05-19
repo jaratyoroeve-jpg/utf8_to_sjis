@@ -3,6 +3,7 @@
 // DO NOT EDIT MANUALLY
 #pragma once
 #if __cplusplus > 201703L
+#include <cstdint>
 
 namespace utf8_sjis {
 namespace detail {
