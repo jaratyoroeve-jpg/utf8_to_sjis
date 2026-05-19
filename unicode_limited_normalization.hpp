@@ -9,7 +9,8 @@ namespace detail {
 /**
  * Unicode の特定のコードポイントを、SJIS で濁点・半濁点が結合された文字に正規化する関数
  * 
- * \param codepoint 正規化対象の Unicode コードポイント
+ * \param mark_codepoint 濁点または半濁点の Unicode コードポイント
+ * \param base_codepoint 正規化対象の Unicode コードポイント
  * \return 正規化された Unicode コードポイント。正規化できない場合は 0x0000 を返す
  */
 consteval uint32_t unicode_limited_normalization(uint32_t mark_codepoint, uint32_t base_codepoint)
@@ -45,7 +46,7 @@ consteval uint32_t unicode_limited_normalization(uint32_t mark_codepoint, uint32
         case 0x30B3: return 0x30B4; // コ -> ゴ
         case 0x30B5: return 0x30B6; // サ -> ザ
         case 0x30B7: return 0x30B8; // シ -> ジ
-        case 0x30B9: return 0x30BA; // ス -> ザ
+        case 0x30B9: return 0x30BA; // ス -> ズ
         case 0x30BB: return 0x30BC; // セ -> ゼ
         case 0x30BD: return 0x30BE; // ソ -> ゾ
         case 0x30BF: return 0x30C0; // タ -> ダ

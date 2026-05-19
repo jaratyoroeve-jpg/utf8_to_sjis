@@ -38,6 +38,7 @@ constexpr auto s = utf8_sjis::utf8_to_sjis<"こんにちは🤔世界", true>;
 | ファイル | 説明 |
 |---|---|
 | `utf8_to_sjis.hpp` | メインヘッダ。UTF-8 → SJIS 変換ロジック |
+| `unicode_limited_normalization.hpp` | 濁点・半濁点の正規化 |
 | `unicode_to_sjis.hpp` | Unicode コードポイント → SJIS 変換テーブル（自動生成） |
 | `generate_unicode_to_sjis.py` | `unicode_to_sjis.hpp` を生成する Python スクリプト |
 

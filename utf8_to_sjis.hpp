@@ -95,9 +95,9 @@ consteval auto convert_utf8_to_sjis()
             if (pos + 5 < src.size) {
                 // 次の文字が濁点・半濁点かどうかを確認するために、さらに3バイト読み込む
                 uint32_t next_codepoint = 0;
-                next_codepoint = ((src.array[pos + 3] & 0x0F) << 12) |
-                                 ((src.array[pos + 4] & 0x3F) << 6) |
-                                 (src.array[pos + 5] & 0x3F);
+                next_codepoint = ((src.data[pos + 3] & 0x0F) << 12) |
+                                 ((src.data[pos + 4] & 0x3F) << 6) |
+                                 (src.data[pos + 5] & 0x3F);
                 uint32_t normalized = unicode_limited_normalization(next_codepoint, codepoint);
                 if (normalized != 0x0000) {
                     codepoint = normalized;
