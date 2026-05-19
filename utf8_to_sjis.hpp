@@ -3,6 +3,7 @@
 #if __cplusplus > 201703L // c++20
 #include <array>
 #include "unicode_to_sjis.hpp"
+#include "unicode_limited_normalization.hpp"
 
 namespace utf8_sjis {
 
@@ -90,6 +91,19 @@ consteval auto convert_utf8_to_sjis()
             codepoint = ((c & 0x0F) << 12) |
                         ((src.data[pos + 1] & 0x3F) << 6) |
                         (src.data[pos + 2] & 0x3F);
+            // unicode正規化(濁点・半濁点のみ対応)
+            if (pos + 5 < src.size) {
+                // 次の文字が濁点・半濁点かどうかを確認するために、さらに3バイト読み込む
+                uint32_t next_codepoint = 0;
+                next_codepoint = ((src.data[pos + 3] & 0x0F) << 12) |
+                                 ((src.data[pos + 4] & 0x3F) << 6) |
+                                 (src.data[pos + 5] & 0x3F);
+                uint32_t normalized = unicode_limited_normalization(next_codepoint, codepoint);
+                if (normalized != 0x0000) {
+                    codepoint = normalized;
+                    pos += 3;
+                }
+            }
             pos += 3;
         } else if ((c & 0xF8) == 0xF0) {
             // 4 バイトの UTF-8 (BMP 外の文字)
